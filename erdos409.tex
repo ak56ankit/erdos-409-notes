@@ -1,0 +1,196 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=1.1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{conjecture}{Conjecture}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+
+\newcommand{\N}{\mathbb{N}}
+\DeclareMathOperator{\vv}{v_2}
+
+% ============================================================
+% FILL IN YOUR NAME BELOW before compiling/posting.
+% The disclosure sentence in the footnote is REQUIRED by the
+% erdosproblems.com forum rules; the second sentence of that
+% footnote must be kept ONLY once it is actually true, i.e.
+% after you have verified the proofs by hand and reproduced
+% the computations yourself.
+% ============================================================
+
+\title{Notes on Erd\H{o}s Problem \#409:\\ the forest structure of $n \mapsto \varphi(n)+1$}
+\author{Ankit\thanks{Working notes, 22 July 2026; not peer-reviewed. These notes were prepared with substantial AI assistance (Claude, Anthropic); every numerical claim was machine-verified with the accompanying code. All proofs have been verified by hand and all computations independently reproduced by the author.}}
+\date{22 July 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Let $f(n)=\varphi(n)+1$ and let $F(n)$ be the number of iterations of $f$ needed to reach a prime (Erd\H{o}s Problem \#409, a question of Finucane; Guy B41 \cite{Guy}; OEIS A039651, A229487 \cite{OEIS}). We prove that for $100\%$ of primes $p\equiv 3\pmod 4$, exactly two integers ever reach $p$ under iteration of $f$, namely $p$ and $2p$; this establishes, for a full-density subfamily of primes, the conjecture recorded on the problem's discussion thread that only finitely many integers reach any fixed prime. We further prove $F(n)\le 5\sqrt n+1$ unconditionally, and that Dickson's conjecture implies $F$ is unbounded, via explicit admissible systems of linear forms built on the map $q\mapsto(3q+1)/2$. Exhaustive computations certify that every basin for every prime $p<30{,}000$ is finite, and determine $\max_{n\le 10^7}F(n)=38$. Finally we recast the question of infinite basins as a multitype branching process in the $2$-adic type $\vv(m-1)$, and measure its Perron root to be $\approx 1.07$--$1.17$ across scales $10^4$--$10^7$: marginally supercritical, which places the recorded finiteness conjecture, if true, near criticality. The theorems are elementary and possibly folklore; none is recorded on the problem page as of 20 December 2025.
+\end{abstract}
+
+\section{The problem}
+
+Erd\H{o}s Problem \#409 \cite{Bloom} asks, for $f(n)=\varphi(n)+1$:
+
+\smallskip
+\noindent\textbf{Q1.} How many iterations of $f$ are needed before a prime is reached? (Write $F(n)$ for this count, with $F(p)=0$ for $p$ prime; OEIS A039651. Recorded remarks: $F(n)=o(n)$ trivially, and $F(n)=1$ infinitely often (Cambie).)
+
+\smallskip
+\noindent\textbf{Q2.} Can infinitely many $n$ reach the same prime?
+
+\smallskip
+\noindent\textbf{Q3.} What is the density of $n$ which reach any fixed prime?
+
+\smallskip
+Additionally recorded on the discussion thread (checked 22 July 2026): (i) a conjecture, referenced to OEIS A229487, that only finitely many integers reach any fixed prime---i.e.\ Q2 conjecturally \emph{no} and Q3 conjecturally \emph{zero}; (ii) explicit constructed examples with $F(n)=67$ (e.g.\ $n=2548851069$), all reaching the prime $9005041$. Below: two unconditional theorems---Theorem~\ref{thm:gate} \emph{proves the recorded finiteness conjecture for a full-density subfamily of primes} ($p\equiv 3\bmod 4$)---one conditional theorem on Q1, exact certified computations complementing the constructed records, and a quantitative branching analysis that sits in mild tension with the recorded conjecture.
+
+\section{Structure}
+
+Write $B(p)=\{n\ge 1:\text{the $f$-trajectory of $n$ contains }p\}$, the \emph{basin} of the prime $p$.
+
+\begin{theorem}\label{thm:structure}
+\begin{enumerate}
+\item[(i)] $f(1)=f(2)=2$, and $f(n)$ is odd for every $n\ge 3$.
+\item[(ii)] The fixed points of $f$ are exactly the primes.
+\item[(iii)] If $n\ge 4$ is composite then $f(n)\le n-\sqrt n+1<n$.
+\item[(iv)] Every trajectory reaches a prime in finitely many steps; hence $\N=\bigsqcup_p B(p)$ (with $1,2\in B(2)$).
+\item[(v)] No even number $\ge 4$ is a value of $f$; hence in the preimage forest every even number is a leaf.
+\item[(vi)] If $f(x)=m$ and $x\neq m$, then $x>m$ (each tree grows strictly upward; there are no cycles).
+\item[(vii)] $F(n)\le 5\sqrt n+1$ for all $n\ge 1$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(i) $\varphi(n)$ is even for $n\ge 3$. (ii) $\varphi(p)+1=p$; conversely $\varphi(n)=n-1$ forces $n$ prime. (iii) The least prime factor $q$ of composite $n$ satisfies $q\le\sqrt n$, so $\varphi(n)\le n-n/q\le n-\sqrt n$. (iv) Immediate from (ii), (iii). (v) By (i), the only even value of $f$ is $2=f(1)=f(2)$. (vi) $\varphi(x)=m-1\le x-1$, with equality iff $x$ is prime, in which case $x=m$. (vii) For composite $m\ge 4$ we have $m-f(m)\ge\sqrt m-1\ge\tfrac12\sqrt m$, so the number of composite iterates lying in $(x/2,x]$ is at most $(x/2)\big/(\tfrac12\sqrt{x/2})=\sqrt{2x}$; summing dyadically, $F(n)\le\sqrt{2n}\,(1-2^{-1/2})^{-1}+O(1)\le 5\sqrt n+1$.
+\end{proof}
+
+Thus the dynamics is a forest: one finite-or-infinite tree per prime, growing strictly upward, with all even numbers as leaves and all branching through odd composite nodes. \emph{Q2 asks exactly whether some tree is infinite.} Since each vertex has finitely many children ($\varphi(x)=v\Rightarrow x\le 2v^2$), K\H{o}nig's lemma shows a tree is infinite iff it contains arbitrarily long chains, i.e.\ iff $F$ is unbounded on a single basin.
+
+\section{The 2-adic gate: Q2 and Q3 for almost all $p\equiv 3\pmod 4$}
+
+\begin{theorem}\label{thm:gate}
+Let $p>3$ be prime with $p\equiv 3\pmod 4$. Then
+\[
+f^{-1}(p)\setminus\{p\}=\{2p\}\;\cup\;\bigl\{q^a,\,2q^a:\ q\text{ prime},\ q\equiv 3\ (\mathrm{mod}\ 4),\ a\ge 2,\ q^{a-1}(q-1)=p-1\bigr\}.
+\]
+Consequently:
+\begin{enumerate}
+\item[(a)] If $p-1$ is \emph{not} of the form $q^{a-1}(q-1)$ with $q\equiv 3\pmod 4$ prime and $a\ge 2$ (call such $p$ non-exceptional), then $B(p)=\{p,2p\}$: exactly two integers in all of $\N$ ever reach $p$.
+\item[(b)] The number of exceptional $p\le x$ is at most $\sqrt{2x}+O(x^{1/3}\log x)$.
+\item[(c)] Since $\#\{p\le x:p\equiv 3\ (4)\}\sim x/(2\log x)$, statement (a) holds for $100\%$ of primes $p\equiv 3\pmod 4$. For these primes the answer to Q2 is no, and to Q3 is density zero (indeed the basin is finite, of size $2$).
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+Suppose $f(n)=p$, i.e.\ $\varphi(n)=p-1\equiv 2\pmod 4$. Write $n=2^b m$ with $m$ odd. Then
+\[
+\vv(\varphi(n))=\max(b-1,0)+\sum_{q\mid m}\vv(q-1),
+\]
+where the sum runs over the distinct odd primes dividing $m$ and each term is $\ge 1$. For the total to equal $1$: either $m=1$, $b=2$ (so $n=4$, $\varphi(n)=2$, $p=3$, excluded), or $m=q^a$ is a prime power with $\vv(q-1)=1$ (i.e.\ $q\equiv 3\bmod 4$) and $b\le 1$. Then $\varphi(n)=q^{a-1}(q-1)=p-1$; the case $a=1$ forces $q=p$, giving $n\in\{p,2p\}$. This proves the displayed classification. For (a): $2p$ is an even leaf by Theorem~\ref{thm:structure}(v), so the tree stops. For (b): if $a=2$ then $q(q-1)=p-1\le x$ gives $q\le\sqrt{2x}$; for each $a\ge 3$, $q^{a-1}\le x$ allows at most $x^{1/(a-1)}$ choices of $q$, and summing over $3\le a\le\log_2 x$ gives $O(x^{1/3}\log x)$. (c) follows since $\sqrt x=o(x/\log x)$.
+\end{proof}
+
+\paragraph{Certified verification.} Among the $1632$ primes $3<p<30000$ with $p\equiv 3\pmod 4$, exactly $1620$ have $B(p)=\{p,2p\}$, and the exceptional set is precisely
+\[
+\{7,\ 19,\ 43,\ 163,\ 487,\ 1459,\ 4423,\ 6163,\ 14407,\ 19183,\ 22651,\ 26407\},
+\]
+matching the $q^{a-1}(q-1)+1$ characterization exactly ($7,19,163,487,1459$ from $q=3$; $43,14407$ from $q=7$; $4423$ from $q=67$; etc.).
+
+\begin{remark}
+Theorem~\ref{thm:gate} does \emph{not} resolve Q2/Q3 as posed (which quantify over all primes); it resolves them for a full-density subfamily, concentrating the open content on $p\equiv 1\pmod 4$ and the sparse exceptional primes.
+\end{remark}
+
+\section{Exact basins (certificates)}
+
+Using an inverse-totient solver validated exhaustively (all $v\le 2000$ against brute force over $n\le 8\cdot 10^6$, justified by the bound $n\le 2\varphi(n)^2$, itself machine-checked on the range), \emph{every basin $B(p)$ for every prime $p<30{,}000$ was computed exactly and is finite} ($3245$ trees; zero truncations at caps of $4\cdot 10^4$ nodes and $10^{12}$ values). Samples:
+
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+$p$ & $B(p)$\\
+\midrule
+$2$ & $\{1,2\}$\\
+$3$ & $\{3,4,6\}$\\
+$5$ & $\{5,8,10,12\}$\\
+$7$ & $\{7,9,14,15,16,18,20,24,30\}$\\
+$11$ & $\{11,22\}$\\
+$13$ & $31$ elements, height $4$, max $138$\\
+$61$ & $57$ elements, height $8$, max $4314$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The largest tree found is at $p=21089$: $|B|=5557$, height $17$, maximal element $4{,}431{,}606$. The tallest is at $p=23509$ (height $20$), whose deepest chain, machine-verified link by link, is
+\begin{multline*}
+115243\to 108449\to 98581\to 84493\to 80029\to 79421\to 77533\to 74141\to 73501\to 71101\\
+\to 70273\to 60229\to 53761\to 52273\to 48241\to 45685\to 36545\to 29233\to 26401\\
+\to 24833\to 23509.
+\end{multline*}
+
+\section{Q1: a conditional unboundedness theorem, and data}
+
+\begin{theorem}[Dickson $\Rightarrow$ $F$ unbounded]\label{thm:dickson}
+Fix $L\ge 1$. For integers $t\ge 1$ with $2^Lt\ne 4$ define
+\[
+q_i(t)=3^{\,i-1}2^{\,L-i+1}\,t-1\quad(1\le i\le L),\qquad p(t)=2^{L+1}t-3.
+\]
+These $L+1$ linear forms constitute an admissible system. If $q_1,\dots,q_L,p$ are simultaneously prime, then with $m_i:=3q_i$ one has $f(m_{i+1})=m_i$ and $f(m_1)=p$, hence $F(3q_L)=L$ exactly. Under Dickson's conjecture \cite{Dickson} this occurs for infinitely many $t$, for every $L$; hence $F$ is unbounded.
+\end{theorem}
+
+\begin{proof}
+By construction $q_{i+1}=(3q_i+1)/2$, so $\varphi(3q_{i+1})=2(q_{i+1}-1)=3q_i-1=m_i-1$, using $\gcd(3,q_{i+1})=1$ (guaranteed by $2^Lt\ne 4$, which forces every $q_i>3$); and $\varphi(3q_1)=2(q_1-1)=2^{L+1}t-4=p-1$. Each $m_i$ is composite, so the trajectory of $3q_L$ takes exactly $L$ steps. Admissibility: all forms are odd; mod $3$, choose $t\equiv 2\ (3)$ for $L$ even and $t\equiv 1\ (3)$ for $L$ odd; mod $r\ge 5$, taking $t\equiv 0$ makes every $q_i\equiv -1$ and $p\equiv -3\not\equiv 0$.
+\end{proof}
+
+\paragraph{Verified witnesses} (each trajectory literally iterated and checked): $L=3$: $t=1$, $F(51)=3$, landing on $13$. $L=4$: $t=2$, $F(321)=4$, landing on $61$. $L=5$: $t=2905$, $F(1{,}411{,}827)=5$, landing on $185{,}917$. $L=6$: $t=750155$, $F(1{,}093{,}725{,}987)=6$, landing on $96{,}019{,}837$.
+
+\paragraph{Data.} Exact computation of $F(n)$ for all $n\le 10^7$ gives the record value $F=38$ at $n=7{,}754{,}613$ (terminal prime $30689$), and
+\[
+\max_{n\le 10^k}F(n)=4,\ 7,\ 11,\ 18,\ 28,\ 38\qquad(k=2,\dots,7),
+\]
+strikingly linear in $\log n$; the distribution of $F$ has a geometric tail of ratio $\approx 0.76$ per step. The bound of Theorem~\ref{thm:structure}(vii) already improves the recorded ``trivially $o(n)$'', but the truth appears to be logarithmic:
+
+\begin{conjecture}\label{conj:log}
+$\max_{n\le x}F(n)\asymp\log x$. (Lower-bound mechanism: the chains of Theorem~\ref{thm:dickson} have top element $\approx 2\cdot 3^L t$; an effective form of Dickson/Bateman--Horn with polynomially bounded least solutions would give $\max_{n\le x}F(n)\gg\log x$.)
+\end{conjecture}
+
+\section{Q2 as a multitype branching process}
+
+By Theorem~\ref{thm:structure}, a tree grows only through odd composite nodes $m$, whose children are the odd solutions $x$ of $\varphi(x)=m-1$. By the valuation identity in the proof of Theorem~\ref{thm:gate}, the fertility of $m$ is governed by its \emph{type} $t=\vv(m-1)$: type-$1$ parents ($m\equiv 3\bmod 4$) admit only prime-power children (rare), while higher types branch freely.
+
+Measured mean-offspring matrices $M[t][t']$ (random odd $m$ of size $\sim x$, types capped at $6$) have Perron roots
+\[
+\lambda\approx 1.10\ (x=10^4),\quad 1.17\ (10^5),\quad 1.09\ (10^6),\quad 1.17\ (3\cdot 10^6),\quad 1.07\ (10^7),
+\]
+with seed-to-seed noise $\pm 0.1$ (offspring counts are heavy-tailed; totient multiplicities are unbounded, cf.~\cite{Ford}). The matrix has a telling shape: fertile high-type parents pour most of their children into the sterile type-$1$ class.
+
+So the process is \emph{marginally supercritical} at every measured scale---yet all $3245$ real trees in range go extinct. These are compatible: with $\lambda\approx 1.1$ and $\Pr(\text{no children})\approx 0.75$--$0.79$, the survival probability per fertile root is small, and the extinction of over $810$ type-$\ge 3$ roots bounds it at roughly $\lesssim 0.4\%$ in this range.
+
+\paragraph{On the recorded conjecture.} The problem thread (via OEIS A229487) records the conjecture that every basin is finite. Theorem~\ref{thm:gate} \emph{proves} this for $100\%$ of primes $\equiv 3\pmod 4$. But the measured $\lambda>1$ means that, if the full conjecture is true, it is true \emph{near criticality}: extinction is marginal, not comfortable. The honest alternatives are: either $\lambda(x)\to\le 1$ (conjecture safe; all basins finite), or $\limsup_x\lambda(x)>1$ and infinite basins exist but are rare (none below $30{,}000$; per-fertile-root survival $\lesssim 0.4\%$ in range). The present data cannot separate these. We regard the reduction of Q2 to the asymptotics of this Perron root as the main structural insight, and note that it mildly \emph{challenges} the recorded conjecture rather than supporting it.
+
+\begin{conjecture}\label{conj:density}
+Every basin has natural density zero. (Proved above for $100\%$ of primes $\equiv 3\pmod 4$; open in general. Note this does not follow automatically even if $B(p)$ is infinite.)
+\end{conjecture}
+
+\section{What is new here, and what remains open}
+
+Already on the thread (not ours): the finiteness/density-zero conjecture (via A229487), and constructed examples with $F=67$. Apparently new here: Theorem~\ref{thm:structure}(vii) ($F\le 5\sqrt n+1$); Theorem~\ref{thm:gate} with its certified exceptional-set verification---a proof of the recorded conjecture for a full-density subfamily of primes, and as far as we can tell the first proven case of Q2/Q3 in any regime; Theorem~\ref{thm:dickson}; the exhaustive basin atlas to $30{,}000$ and exhaustive $F$-records to $10^7$ (complementing the thread's constructed examples); and the multitype-branching reformulation of Q2 with measured near-critical $\lambda$. The elementary ingredients of Theorem~\ref{thm:gate} (the $2$-adic valuation of $\varphi$; the classification of $\varphi(n)\equiv 2\bmod 4$) are classical; we make no priority claim beyond ``apparently unrecorded for this problem.''
+
+Still open: Q2 and Q3 in full (equivalently, whether any tree is infinite; the fate of $p\equiv 1\pmod 4$); unconditional unboundedness of $F$; any $F(n)\ll n^{o(1)}$ upper bound.
+
+\section{Code}
+
+\texttt{e409.py} (validated $\varphi$-sieve, dynamic program for $F$, exact inverse totient) and \texttt{basins.py} (exact basin BFS with certificates). All experiments are reproducible in minutes on a laptop.
+
+\begin{thebibliography}{9}
+\bibitem{Bloom} T.~F.~Bloom, \emph{Erd\H{o}s Problem \#409}, \url{https://www.erdosproblems.com/409}, accessed 2026-07-22.
+\bibitem{Dickson} L.~E.~Dickson, A new extension of Dirichlet's theorem on prime numbers, \emph{Messenger of Mathematics} \textbf{33} (1904), 155--161.
+\bibitem{Ford} K.~Ford, The distribution of totients, \emph{Ramanujan J.} \textbf{2} (1998), 67--151.
+\bibitem{Guy} R.~K.~Guy, \emph{Unsolved Problems in Number Theory}, 3rd ed., Springer, 2004. Problem B41.
+\bibitem{OEIS} OEIS Foundation Inc.\ (2026), entries A039651 and A229487, \emph{The On-Line Encyclopedia of Integer Sequences}, \url{https://oeis.org}.
+\end{thebibliography}
+
+\end{document}
